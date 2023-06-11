@@ -1,8 +1,10 @@
 import useStoreAuth from "@/modules/auth/useStoreAuth";
 import { login, logout } from "@/modules/auth/actions";
 
+import useStore from "@/utils/useStore";
+
 const HomePage = () => {
-  const { username } = useStoreAuth();
+  const username = useStore(useStoreAuth, ({ username }) => username);
 
   return (
     <main>
