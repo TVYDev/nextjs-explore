@@ -1,118 +1,190 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { Button, Grid, Stack, Typography } from "@mui/material";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const inter = Inter({ subsets: ['latin'] })
+import AutoCompleteInput from "@/components/AutoCompleteInput";
+import {
+  TFormValidationSchema,
+  formValidationSchema,
+} from "@/libs/validations/all";
+import MultiAutoCompleteInput from "@/components/MultiAutoCompleteInput";
+import { IDropDownOption } from "@/types/form";
+import { useEffect, useMemo } from "react";
+
+const carOptions: IDropDownOption[] = [
+  { value: "audi_q8", label: "Audi Q8" },
+  { value: "volvo_cx90", label: "Volvo CX90" },
+  { value: "defender", label: "Landrover Defender" },
+];
+
+const brandOptions: IDropDownOption[] = [
+  { value: "audi", label: "Audi" },
+  { value: "volvo", label: "Volvo" },
+  { value: "bmw", label: "BMW" },
+];
+
+const yearOptions: IDropDownOption[] = [
+  { value: "2001", label: "2001" },
+  { value: "2010", label: "2010" },
+  { value: "2020", label: "2020" },
+];
+
+let reRender = 0;
 
 export default function Home() {
+  const { control, handleSubmit, setValue, reset, watch, resetField } =
+    useForm<TFormValidationSchema>({
+      resolver: zodResolver(formValidationSchema),
+      defaultValues: {
+        car: "",
+        brands: [],
+        year: "",
+      },
+    });
+
+  const watchCar = watch("car");
+  const watchYear = watch("year");
+
+  const onFormSubmit = (data: TFormValidationSchema) => {
+    console.log("Submitted Data", data);
+  };
+
+  const yearsOptionBasedOnCar = useMemo(
+    () =>
+      watchCar === "audi_q8"
+        ? yearOptions.filter((option) => option.value !== "2001")
+        : yearOptions,
+    [watchCar]
+  );
+
+  useEffect(() => {
+    if (yearsOptionBasedOnCar.some((option) => option.value === watchYear))
+      return;
+
+    resetField("year");
+  }, [yearsOptionBasedOnCar, watchYear, resetField]);
+
+  const handleResetForm = () => {
+    reset();
+  };
+
+  const handleSetCar = () => {
+    setValue("car", "volvo_cx90", { shouldValidate: true });
+  };
+
+  const handleSetBrands = () => {
+    setValue("brands", ["audi", "bmw"], { shouldValidate: true });
+  };
+
+  console.log("Rerender", reRender++);
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+    <main className="p-4">
+      <form onSubmit={handleSubmit(onFormSubmit)}>
+        <Grid container spacing={2}>
+          <Grid item md={12}>
+            <section id="single_autocomplete">
+              <Typography variant="subtitle1" className="pb-2">
+                AutoComplete
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid
+                  item
+                  md={12}
+                  container
+                  spacing={2}
+                  className="flex items-center"
+                >
+                  <Grid item md={6}>
+                    <AutoCompleteInput
+                      control={control}
+                      name="car"
+                      options={carOptions}
+                      textFieldProps={{
+                        label: "Cars",
+                      }}
+                    />
+                  </Grid>
+                  <Grid item md={6}>
+                    <Button variant="outlined" onClick={handleSetCar}>
+                      Set Car to Volvo CX 90
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </section>
+          </Grid>
+          <Grid item md={12}>
+            <section id="multip_autocomplete">
+              <Typography variant="subtitle1" className="pb-2">
+                MultiAutoComplete
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid
+                  item
+                  md={12}
+                  container
+                  spacing={2}
+                  className="flex items-center"
+                >
+                  <Grid item md={6}>
+                    <MultiAutoCompleteInput
+                      control={control}
+                      name="brands"
+                      options={brandOptions}
+                      textFieldProps={{
+                        label: "Brands",
+                      }}
+                    />
+                  </Grid>
+                  <Grid item md={6}>
+                    <Button variant="outlined" onClick={handleSetBrands}>
+                      Set BMW & Audi
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </section>
+          </Grid>
+          <Grid item md={12}>
+            <section id="dynamic_single_autocomplete">
+              <Typography variant="subtitle1" className="pb-2">
+                Dynamic Single AutoComplete
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid
+                  item
+                  md={12}
+                  container
+                  spacing={2}
+                  className="flex items-center"
+                >
+                  <Grid item md={6}>
+                    <AutoCompleteInput
+                      control={control}
+                      name="year"
+                      options={yearsOptionBasedOnCar}
+                      textFieldProps={{
+                        label: "Year",
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </section>
+          </Grid>
+          <Grid item md={12}>
+            <Stack direction="row" spacing={2}>
+              <Button variant="contained" type="submit">
+                Submit
+              </Button>
+              <Button onClick={handleResetForm} variant="outlined">
+                Reset
+              </Button>
+            </Stack>
+          </Grid>
+        </Grid>
+      </form>
     </main>
-  )
+  );
 }
